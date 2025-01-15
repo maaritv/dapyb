@@ -1,0 +1,13 @@
+{
+    "statistics_description" : "Tässä taulukossa ovat kaikki tärkeimmät tunnusluvut, jotka kuvaavat kirjaston toimintaa.",
+    "category_diagram_description" : "Tämä kuvaaja kuvaa kirjaston eri kirjaryhmien kulutuksen osuutta.",
+    "lost_books" : "Kirja on hukassa, kun sen paluupäivämäärä on tyhjä ja kirja on ollut lainassa yli 60 pv.",
+    "late_books" : "Kirja on myöhässä, kun se on ollut lainassa yli 30 päivää.",
+    "period": "Ajanjakso",
+    "most_popular_book_category": "Suosituin kategoria",
+    "loan_change_percent": "Muutos lainamäärissä (%)",
+    "new_loans_qty": "Uusia lainoja (kpl)",
+    "late_loans_qty": "Lainassa yli 30 pv, ei palautettu (kpl)",
+    "lost_books_qty": "Lainassa yli 60 päivää, ei palautettu (kpl)",
+    "average_loan_duration_days": "Keskimääräinen laina-aika (päivää)"
+}
