@@ -1,0 +1,14 @@
+[
+    {
+        "month" : "june",
+        "mean": 21,
+        "stdErr" : 3.4,
+        "max" : 42
+    },
+    {
+        "month" : "july",
+        "mean": 21,
+        "stdErr" : 3.4,
+        "max" : 50
+    }
+]

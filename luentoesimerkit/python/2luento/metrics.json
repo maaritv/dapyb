@@ -3,7 +3,7 @@
     "most_popular_book_category": "Lastenkirjat",
     "loan_change_percent": 100.0,
     "new_loans_qty": 8,
-    "late_loans_qty": 2,
+    "late_loans_qty": 1,
     "lost_books_qty": 3,
-    "average_loan_duration_days": 20.0
+    "average_loan_duration_days": 21.2
 }

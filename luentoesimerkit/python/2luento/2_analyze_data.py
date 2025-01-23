@@ -18,11 +18,21 @@ def prepare_data(file_path):
     df = pd.read_csv(file_path, sep=',')
     return df
 
-def get_most_popular_category(df):
+def get_most_popular_category(df, start_date_str, end_date_str):
     """
-    Laskee suosituimman kirjakategorian annetulla ajanjaksolla.
+    Laskee suosituimman kirjakategorian koko aikavälillä.
     """
-    category_counts = df["bookCat"].value_counts()
+    start_date=pd.to_datetime(start_date_str)
+    end_date=pd.to_datetime(end_date_str)
+
+    period_loans = (pd.to_datetime(df["loanDate"]) >= start_date) & (pd.to_datetime(df["loanDate"]) <= end_date)
+
+    filtered_df = df[period_loans]
+
+    # Laske kategorioiden määrä
+    category_counts = filtered_df["bookCat"].value_counts()
+    print(category_counts)
+    print(category_counts.idxmax())
     return category_counts.idxmax()
 
 
@@ -35,15 +45,17 @@ def get_new_loans_count(df, start_date_str, end_date_str):
     start_date=pd.to_datetime(start_date_str)
     end_date=pd.to_datetime(end_date_str)
 
-    mask = (pd.to_datetime(df["loanDate"]) >= start_date) & (pd.to_datetime(df["loanDate"]) <= pd.to_datetime(end_date))
-    return int(mask.sum())
+    new_loans_mask = (pd.to_datetime(df["loanDate"]) >= start_date) & (pd.to_datetime(df["loanDate"]) <= end_date)
+    filtered_df = df[new_loans_mask]
+    return int(filtered_df["bookCat"].count())
 
 def get_late_loans_count(df):
     """
     Laskee myöhästyneiden lainojen määrän.
     """
-    late_loans = pd.to_datetime(df["returnDate"]) > (pd.to_datetime(df["loanDate"]) + pd.Timedelta(days=30)) 
-    return int(late_loans.sum())
+    late_loans_mask = pd.to_datetime(df["returnDate"]) > (pd.to_datetime(df["loanDate"]) + pd.Timedelta(days=31)) 
+    #print(late_loans_mask)
+    return int(late_loans_mask.sum())
 
 def get_lost_books_count(df):
     """
@@ -51,25 +63,32 @@ def get_lost_books_count(df):
     hukassa, kun sen paluupäivämäärä on tyhjä ja kirja on ollut lainassa yli 
     60 pv.
     """
-    lost_books = ((datetime.now() - pd.to_datetime(df["loanDate"])).dt.days>60) & (df["returnDate"].isna())
-    return int(lost_books.sum())
+    lost_books_mask = ((datetime.now() - pd.to_datetime(df["loanDate"])).dt.days>60) & (df["returnDate"].isna())
+    return int(lost_books_mask.sum())
 
-def get_average_loan_duration(df):
+def get_average_loan_duration_of_month(df, start_date_str, end_date_str):
     """
     Laskee lainojen keskimääräisen keston päivinä.
     """
-    loan_durations = (pd.to_datetime(df["returnDate"]) - pd.to_datetime(df["loanDate"])).dt.days
-    loan_durations = loan_durations.dropna()
-    return float(loan_durations.mean())
+    start_date=pd.to_datetime(start_date_str)
+    end_date=pd.to_datetime(end_date_str)
 
-def get_loan_change_percentage(previous_loans, current_loans):
+    new_loans_mask = (pd.to_datetime(df["loanDate"]) >= start_date) & (pd.to_datetime(df["loanDate"]) <= end_date)
+    month_df = df[new_loans_mask]
+    
+    loan_durations_mask = (pd.to_datetime(month_df["returnDate"]) - pd.to_datetime(month_df["loanDate"])).dt.days
+    print(loan_durations_mask)
+    loan_durations_mask = loan_durations_mask.dropna()
+    return float(loan_durations_mask.mean())
+
+def get_change_percentage(previous_loans_count, current_loans_count):
     """
     Laskee lainauksen prosentuaalisen muutoksen.
     """
-    print(f"Current loans {current_loans} vs previous loans {previous_loans}")
-    if previous_loans == 0:
-        return float('inf') if current_loans > 0 else 0
-    return float((current_loans - previous_loans) / previous_loans) * 100
+    print(f"Current loans {current_loans_count} vs previous loans {previous_loans_count}")
+    if previous_loans_count == 0:
+        return float('inf') if current_loans_count > 0 else 0
+    return float((current_loans_count - previous_loans_count) / previous_loans_count) * 100
 
 def minusOneMonth(start_date_str):
     start_date = pd.to_datetime(start_date_str, format='%Y-%m-%d')
@@ -81,24 +100,24 @@ def minusOneMonth(start_date_str):
     return last_month.strftime('%Y-%m-%d')
 
 
-def calculate_library_metrics(file_path, start_date_str, end_date_str):
+def calculate_library_monthly_metrics(file_path, start_date_str, end_date_str):
     """
     Laskee kaikki tunnusluvut annetun datan perusteella.
     """
     df = prepare_data(file_path)
-    most_popular_category = get_most_popular_category(df)
+    most_popular_category = get_most_popular_category(df, start_date_str, end_date_str)
     new_loans_count = get_new_loans_count(df, start_date_str, end_date_str)
     print("Uusia lainoja ", new_loans_count)
     late_loans_count = get_late_loans_count(df)
     print("Myöhästyneitä lainoja ", late_loans_count)
     lost_books_count = get_lost_books_count(df)
     print("Hukattuja lainoja ", lost_books_count)
-    average_loan_duration = get_average_loan_duration(df)
+    average_loan_duration = get_average_loan_duration_of_month(df, start_date_str, end_date_str)
     print("Keskimääräinen laina-aika ", average_loan_duration)
     last_month_start_str=minusOneMonth(start_date_str)
     last_month_end_str = minusOneMonth(end_date_str)
     previous_loans_count=get_new_loans_count(df, last_month_start_str, last_month_end_str)
-    loan_change_percentage = get_loan_change_percentage(previous_loans_count, new_loans_count)
+    loan_change_percentage = get_change_percentage(previous_loans_count, new_loans_count)
     print("Muutos lainamäärissä ", loan_change_percentage)
 
     ## Käytä tässä perustietotyyppejä. (string, float, int)
@@ -117,12 +136,11 @@ def saveResultToFile(metrics):
         json.dump(metrics, file, indent=4)
 
 # Esimerkki edellisen periodin lainauksista
-previous_loans_count = 12
 file_path="librarydata.csv"
 start_date_str="2024-01-01"
 end_date_str="2024-01-31"
 
 # Lasketaan tunnusluvut
-metrics = calculate_library_metrics(file_path, start_date_str, end_date_str)
+metrics = calculate_library_monthly_metrics(file_path, start_date_str, end_date_str)
 saveResultToFile(metrics)
 
