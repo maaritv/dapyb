@@ -158,10 +158,11 @@ def create_category_data_for_barchart(data_file, aggregation_column):
     df = pd.DataFrame(datatable)
     print(df)
     # Muutetaan sarakkeet riveiksi ja päinvastoin
-    #ennen muuttamista matriisiksi
-    """Lastenkirjat  6
-1      Tietokirjat  5
-2      Dekkarit  1
+    #transpoosilla ennen muuttamista  taulukoksi.
+    """
+       Lastenkirjat  6
+       Tietokirjat   5
+       Dekkarit      s1
     """
     df_transposed = df.transpose()  # or df.transpose()
     print(df_transposed) 
@@ -169,6 +170,24 @@ def create_category_data_for_barchart(data_file, aggregation_column):
     #Muutetaan Pandas-dataframe matriisiksi
     table[0] = ['bookCat', 'value']
     return table
+
+def create_category_data_for_piechart(data_file, aggregation_column):
+    df = prepare_data(data_file)
+    category_counts = df[aggregation_column].value_counts()
+
+    # Compute percentages
+    category_percentages = (category_counts / category_counts.sum()) * 100
+
+    # Convert to DataFrame
+    category_percentages_df = category_percentages.reset_index()
+    category_percentages_df.columns = [aggregation_column, 'percentage']
+
+    # Print result
+    print(category_percentages_df)
+    table = [category_percentages_df.columns.tolist()] + category_percentages_df.values.tolist()
+    #Muutetaan Pandas-dataframe matriisiksi
+    return table
+
 
 def save_category_data_to_csv(category_data, csv_filename):
 
@@ -198,3 +217,5 @@ saveResultToFile(metrics)
 book_categories_and_loan_counts = create_category_data_for_barchart("librarydata.csv", 'bookCat')
 save_category_data_to_csv(book_categories_and_loan_counts, "bookcats_output.csv")
 
+shares = create_category_data_for_piechart("librarydata.csv", "bookCat")
+save_category_data_to_csv(shares, "bookcats_shares_output.csv")
