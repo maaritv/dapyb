@@ -10,15 +10,12 @@ def create_line_chart(title, xlabel, ylabel):
     plt.xlabel(xlabel, fontsize=12)
     plt.ylabel(ylabel, fontsize=12)
     plt.grid(True)
-    #plt.tight_layout()
     return plt
 
-def add_line_to_chart(plot, x, y, label, color):
+def add_line_to_chart(plot, x, y, label, color, filename='linechart.png'):
     plot.plot(x, y, marker='o', label=label, color=color, linewidth=2)
-    plot.savefig("sales.png") 
-    plot.savefig("sales.pdf")
-    plot.savefig("sales.svg")
-
+    plot.savefig(filename) 
+    
 title='Omenien ja päärynöiden myynnin kehitys (2017-2024)'
 apple_label='Omenat (euroa)'
 pear_label='Päärynät (euroa)'
