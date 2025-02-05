@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 
@@ -25,8 +26,15 @@ xlabel="Vuosi"
 ylabel="Myynti (euroa)"
 
 years = np.arange(2017, 2024)
-apple_sales = [2000, 2100, 1900, 2600, 2800, 2700, 3000]  # Npuseva trendi nähtävissä
-pear_sales = [4000, 4100, 3800, 3100, 3000, 2500, 2400]   # Laskevaa trendiä
+
+data = pd.read_csv('sales.csv', delimiter=";")
+#categories = ['Omakotitalot', 'Rivitalot', 'Luhtitalot', 'Kerrostalot']
+#values = [53, 24, 10, 6]  # Rakennusten lukumäärä samassa järjestyksessä
+apple_sales = data['apples']
+pear_sales = data['pears']
+
+#apple_sales = [2000, 2100, 1900, 2600, 2800, 2700, 3000]  # Npuseva trendi nähtävissä
+#pear_sales = [4000, 4100, 3800, 3100, 3000, 2500, 2400]   # Laskevaa trendiä
 
 create_line_chart(title, xlabel, ylabel)
 add_line_to_chart(plt, years, pear_sales, pear_label, pear_color)
