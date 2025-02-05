@@ -25,6 +25,3 @@ plt.savefig("sales.pdf")
 plt.savefig("sales.svg")
 
 
-# Show the plot
-plt.show()
-

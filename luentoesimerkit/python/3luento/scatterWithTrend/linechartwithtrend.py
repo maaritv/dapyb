@@ -24,5 +24,4 @@ plt.grid(alpha=0.3)
 
 plt.savefig("sleep_and_caffeine.png") 
 
-plt.show()
 

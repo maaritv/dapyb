@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+import csv
 
 # Lasketaan kirjaston lainausdatasta tilastollisia 
 # tunnuslukuja. Tämä on osa data-analyysivaihetta.
@@ -99,7 +100,7 @@ def minusOneMonth(start_date_str):
     # Palautetaan päivämäärä merkkijonona
     return last_month.strftime('%Y-%m-%d')
 
-
+##Tunnuslukutaulukon sisältö.
 def calculate_library_monthly_metrics(file_path, start_date_str, end_date_str):
     """
     Laskee kaikki tunnusluvut annetun datan perusteella.
@@ -135,6 +136,55 @@ def saveResultToFile(metrics):
     with open("metrics.json", "w") as file:
         json.dump(metrics, file, indent=4)
 
+
+##Lasketaan, montako lainausta oli tehty eri kategorioiden kirjoille.
+"""
+   Aggregation column on sarake, jonka mukaan data librarydata.csv -tiedostossa
+   halutaan ryhmitellä. Jos se on bookCat, SQL:nä se vastaisi:
+   select bookCat, count(loanId) as value from librarydata GROUP BY bookCat 
+"""
+def create_category_data_for_barchart(data_file, aggregation_column):
+    df = prepare_data(data_file)
+    category_counts = df[aggregation_column].value_counts()
+    #['Lastenkirjat', 'Dekkarit', 'Tietokirjat']
+    categories = category_counts.index.tolist()
+    #[3, 6,9]
+    values = category_counts.values.tolist()
+    #print("Kategoriat:", categories)
+    #print("Lukumäärät:", values)
+    """['Lastenkirjat', 'Dekkarit', 'Tietokirjat']
+       [3, 6, 9] """
+    datatable = [categories, values]
+    df = pd.DataFrame(datatable)
+    print(df)
+    # Muutetaan sarakkeet riveiksi ja päinvastoin
+    #ennen muuttamista matriisiksi
+    """Lastenkirjat  6
+1      Tietokirjat  5
+2      Dekkarit  1
+    """
+    df_transposed = df.transpose()  # or df.transpose()
+    print(df_transposed) 
+    table = [df_transposed.columns.tolist()] + df_transposed.values.tolist()
+    #Muutetaan Pandas-dataframe matriisiksi
+    table[0] = ['bookCat', 'value']
+    return table
+
+def save_category_data_to_csv(category_data, csv_filename):
+
+    # Luodaan CSV-tiedosto
+    ##cateogory_data = [['Category', 'Value'],
+    ##    ['Omakotitalot', 53],
+    ##    ['Rivitalot', 24],
+    ##    ['Luhtitalot', 10],
+    ##    ['Kerrostalot', 6]]
+
+    with open(csv_filename, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerows(category_data)
+
+    print(f"CSV-tiedosto '{csv_filename}' luotu.")
+
 # Esimerkki edellisen periodin lainauksista
 file_path="librarydata.csv"
 start_date_str="2024-01-01"
@@ -143,4 +193,8 @@ end_date_str="2024-01-31"
 # Lasketaan tunnusluvut
 metrics = calculate_library_monthly_metrics(file_path, start_date_str, end_date_str)
 saveResultToFile(metrics)
+
+
+book_categories_and_loan_counts = create_category_data_for_barchart("librarydata.csv", 'bookCat')
+save_category_data_to_csv(book_categories_and_loan_counts, "bookcats_output.csv")
 
