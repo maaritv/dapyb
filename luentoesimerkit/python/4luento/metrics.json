@@ -1,0 +1,9 @@
+{
+    "period": "2024-01-01 - 2024-12-31",
+    "most_popular_book_category": "Lastenkirjat",
+    "loan_change_percent": 44,
+    "new_loans_qty": 2500,
+    "late_loans_qty": 600,
+    "lost_books_qty": 300,
+    "average_loan_duration_days": 21.2
+}
